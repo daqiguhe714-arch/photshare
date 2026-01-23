@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>アップロード</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", Meiryo, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    
+    .header {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 16px;
+    }
+    .header h1 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .info {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #666;
+    }
+    .badge {
+      background: #f0f0f0;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .file-upload-area {
+      border: 3px dashed #d0d0d0;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+    .file-upload-area:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    .file-upload-area.drag-over {
+      border-color: #667eea;
+      background: #e8eeff;
+    }
+    
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .upload-text {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .upload-hint {
+      font-size: 13px;
+      color: #999;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .preview-area {
+      margin-top: 20px;
+      display: none;
+    }
+    .preview-area.show {
+      display: block;
+    }
+    
+    .preview-container {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f5f5f5;
+      margin-bottom: 12px;
+    }
+    .preview-container img,
+    .preview-container video {
+      width: 100%;
+      display: block;
+      max-height: 400px;
+      object-fit: contain;
+    }
+    
+    .file-info {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    .file-info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .file-info-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    button {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+    
+    .message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-top: 16px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+    .message.show {
+      display: block;
+    }
+    .message.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .message.info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 12px;
+      display: none;
+    }
+    .progress-bar.show {
+      display: block;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+    }
+    .nav a {
+      text-decoration: none;
+      color: #666;
+      font-size: 13px;
+      text-align: center;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav a:active {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📤 アップロード</h1>
+    <div class="info">
+      <span class="badge">グループ: <span id="gid"></span></span>
+      <span class="badge">表示名: <span id="pname"></span></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="file-upload-area" id="uploadArea">
+        <div class="upload-icon">📸</div>
+        <div class="upload-text">タップして写真・動画を選択</div>
+        <div class="upload-hint">またはドラッグ&ドロップ（最大100MB）</div>
+      </div>
+      <input id="fileInput" type="file" accept="image/*,video/*" />
+      
+      <div class="preview-area" id="previewArea">
+        <div class="preview-container" id="previewContainer"></div>
+        <div class="file-info" id="fileInfo"></div>
+        
+        <button class="btn-primary" id="uploadBtn">
+          <span id="uploadBtnText">📤 アップロード</span>
+        </button>
+        <button class="btn-secondary" id="cancelBtn">✕ キャンセル</button>
+        
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+      
+      <div class="message" id="message"></div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="./join.html">👥 参加</a>
+    <a href="./upload.html">📤 アップロード</a>
+    <a href="./gallery.html">🖼️ ギャラリー</a>
+  </nav>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://bruxurxlvmnculmsvqwo.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJydXh1cnhsdm1uY3VsbXN2cXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNTY4MzEsImV4cCI6MjA4NDczMjgzMX0.SsuD6zomVOdxtA7YS_LeodelnstYiOgDo5lA8nkl46I";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const MAX_BYTES = 100 * 1024 * 1024;
+
+    const gid = localStorage.getItem("group_id") || "";
+    const posterName = localStorage.getItem("poster_name") || "";
+    document.getElementById("gid").textContent = gid || "未参加";
+    document.getElementById("pname").textContent = posterName || "未設定";
+
+    const uploadArea = document.getElementById("uploadArea");
+    const fileInput = document.getElementById("fileInput");
+    const previewArea = document.getElementById("previewArea");
+    const previewContainer = document.getElementById("previewContainer");
+    const fileInfo = document.getElementById("fileInfo");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const messageEl = document.getElementById("message");
+    const progressBar = document.getElementById("progressBar");
+    const progressFill = document.getElementById("progressFill");
+    const uploadBtnText = document.getElementById("uploadBtnText");
+
+    let selectedFile = null;
+
+    const showMessage = (text, type = 'info') => {
+      messageEl.textContent = text;
+      messageEl.className = `message show ${type}`;
+      setTimeout(() => {
+        messageEl.className = 'message';
+      }, 4000);
+    };
+
+    const formatBytes = (bytes) => {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 10) / 10 + ' ' + sizes[i];
+    };
+
+    const handleFile = (file) => {
+      if (!file) return;
+
+      if (file.size > MAX_BYTES) {
+        showMessage('ファイルサイズは100MB以下にしてください', 'error');
+        return;
+      }
+
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        showMessage('画像または動画ファイルを選択してください', 'error');
+        return;
+      }
+
+      selectedFile = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewContainer.innerHTML = file.type.startsWith('image/')
+          ? `<img src="${e.target.result}" alt="プレビュー">`
+          : `<video src="${e.target.result}" controls></video>`;
+        
+        fileInfo.innerHTML = `
+          <div class="file-info-row">
+            <span>📄 ファイル名</span>
+            <span>${file.name}</span>
+          </div>
+          <div class="file-info-row">
+            <span>📊 サイズ</span>
+            <span>${formatBytes(file.size)}</span>
+          </div>
+          <div class="file-info-row">
+            <span>📝 種類</span>
+            <span>${file.type.startsWith('image/') ? '画像' : '動画'}</span>
+          </div>
+        `;
+        
+        previewArea.classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('drag-over');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('drag-over');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      if (e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      selectedFile = null;
+      fileInput.value = '';
+      previewArea.classList.remove('show');
+      previewContainer.innerHTML = '';
+      fileInfo.innerHTML = '';
+    });
+
+    const safeName = (name) => name.replace(/[^\w.\-]+/g, "_");
+
+    const ensureAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) return true;
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        showMessage("認証エラー: " + error.message, 'error');
+        return false;
+      }
+      return true;
+    };
+
+    uploadBtn.addEventListener('click', async () => {
+      if (!gid || !posterName) {
+        showMessage("先にjoin.htmlでグループに参加してください", 'error');
+        return;
+      }
+
+      if (!selectedFile) {
+        showMessage("ファイルを選択してください", 'error');
+        return;
+      }
+
+      const okAuth = await ensureAuth();
+      if (!okAuth) return;
+
+      const { data: sessData, error: sessErr } = await supabase.auth.getSession();
+      if (sessErr) {
+        showMessage("セッション取得エラー: " + sessErr.message, 'error');
+        return;
+      }
+
+      const uid = sessData.session?.user?.id;
+      if (!uid) {
+        showMessage("ユーザー情報の取得に失敗しました", 'error');
+        return;
+      }
+
+      const type = selectedFile.type.startsWith("image/") ? "image" : "video";
+      const key = `${gid}/${uid}/${Date.now()}_${safeName(selectedFile.name)}`;
+
+      uploadBtn.disabled = true;
+      uploadBtnText.textContent = "アップロード中...";
+      progressBar.classList.add('show');
+      progressFill.style.width = '30%';
+
+      const { error: upErr } = await supabase.storage
+        .from("media")
+        .upload(key, selectedFile, { upsert: false, contentType: selectedFile.type });
+
+      if (upErr) {
+        showMessage("アップロード失敗: " + upErr.message, 'error');
+        uploadBtn.disabled = false;
+        uploadBtnText.textContent = "📤 アップロード";
+        progressBar.classList.remove('show');
+        progressFill.style.width = '0%';
+        return;
+      }
+
+      progressFill.style.width = '70%';
+
+      const { error: insErr } = await supabase.from("posts").insert([{
+        group_id: gid,
+        user_id: uid,
+        poster_name: posterName,
+        type,
+        object_path: key,
+        original_name: selectedFile.name,
+        size_bytes: selectedFile.size
+      }]);
+
+      if (insErr) {
+        showMessage("データベース登録失敗: " + insErr.message, 'error');
+        uploadBtn.disabled = false;
+        uploadBtnText.textContent = "📤 アップロード";
+        progressBar.classList.remove('show');
+        progressFill.style.width = '0%';
+        return;
+      }
+
+      progressFill.style.width = '100%';
+
+      showMessage("✅ アップロード完了！", 'success');
+      
+      setTimeout(() => {
+        selectedFile = null;
+        fileInput.value = '';
+        previewArea.classList.remove('show');
+        previewContainer.innerHTML = '';
+        fileInfo.innerHTML = '';
+        uploadBtn.disabled = false;
+        uploadBtnText.textContent = "📤 アップロード";
+        progressBar.classList.remove('show');
+        progressFill.style.width = '0%';
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

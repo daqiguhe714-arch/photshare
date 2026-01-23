@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ギャラリー</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", Meiryo, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    
+    .header {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 16px;
+    }
+    .header h1 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .info {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #666;
+    }
+    .badge {
+      background: #f0f0f0;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    
+    .controls-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .controls-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .btn-reload {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-reload:active {
+      transform: scale(0.95);
+    }
+    
+    .selection-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-select {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      color: #666;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-select:active {
+      transform: scale(0.95);
+    }
+    
+    .btn-download {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+    .btn-download.show {
+      display: block;
+    }
+    .btn-download:active {
+      transform: scale(0.95);
+    }
+    .btn-download:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .selected-count {
+      padding: 8px 12px;
+      background: #e8eeff;
+      color: #667eea;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+    }
+    .selected-count.show {
+      display: block;
+    }
+    
+    .status-message {
+      background: white;
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+    
+    .person-section {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .person-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .person-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .person-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+    }
+    
+    .person-details h3 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .person-count {
+      font-size: 13px;
+      color: #999;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .card.selected {
+      box-shadow: 0 0 0 3px #667eea;
+    }
+    
+    .selection-overlay {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 32px;
+      height: 32px;
+      background: white;
+      border: 3px solid #ddd;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card.selected .selection-overlay {
+      background: #667eea;
+      border-color: #667eea;
+    }
+    .selection-overlay::after {
+      content: '✓';
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      display: none;
+    }
+    .card.selected .selection-overlay::after {
+      display: block;
+    }
+    
+    .media-container {
+      position: relative;
+      width: 100%;
+      padding-top: 75%;
+      background: #f5f5f5;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .media-container img,
+    .media-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .card-content {
+      padding: 12px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .poster-name {
+      font-weight: 600;
+      color: #333;
+      font-size: 15px;
+    }
+    
+    .btn-delete {
+      padding: 6px 12px;
+      background: #fee2e2;
+      color: #991b1b;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-delete:active {
+      background: #fecaca;
+    }
+    
+    .card-meta {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.6;
+    }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .meta-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .type-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e8eeff;
+      color: #667eea;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .empty-state {
+      background: white;
+      border-radius: 16px;
+      padding: 60px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .empty-text {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .empty-hint {
+      font-size: 14px;
+      color: #999;
+    }
+    
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+    }
+    .nav a {
+      text-decoration: none;
+      color: #666;
+      font-size: 13px;
+      text-align: center;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .nav a.active {
+      background: #f0f4ff;
+      color: #667eea;
+      font-weight: 600;
+    }
+    .nav a:active {
+      background: #e8eeff;
+    }
+    
+    .progress-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .progress-overlay.show {
+      display: flex;
+    }
+    .progress-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      min-width: 300px;
+      text-align: center;
+    }
+    .progress-text {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🖼️ ギャラリー</h1>
+    <div class="info">
+      <span class="badge">グループ: <span id="gid"></span></span>
+      <span class="badge">表示名: <span id="pname"></span></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="controls-card">
+      <div class="controls-row">
+        <button class="btn-reload" id="reloadBtn">🔄 更新</button>
+        <div class="selection-controls">
+          <button class="btn-select" id="selectAllBtn">☑️ すべて選択</button>
+          <button class="btn-select" id="deselectAllBtn">⬜ 選択解除</button>
+          <span class="selected-count" id="selectedCount">0件選択中</span>
+          <button class="btn-download" id="downloadBtn">💾 ダウンロード</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-message" id="msg"></div>
+    <div id="sections"></div>
+  </div>
+
+  <div class="progress-overlay" id="progressOverlay">
+    <div class="progress-content">
+      <div class="progress-text" id="progressText">ダウンロード中...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <a href="./join.html">👥 参加</a>
+    <a href="./upload.html">📤 アップロード</a>
+    <a href="./gallery.html" class="active">🖼️ ギャラリー</a>
+  </nav>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://bruxurxlvmnculmsvqwo.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJydXh1cnhsdm1uY3VsbXN2cXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNTY4MzEsImV4cCI6MjA4NDczMjgzMX0.SsuD6zomVOdxtA7YS_LeodelnstYiOgDo5lA8nkl46I";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const gid = localStorage.getItem("group_id") || "";
+    const posterName = localStorage.getItem("poster_name") || "";
+    document.getElementById("gid").textContent = gid || "未参加";
+    document.getElementById("pname").textContent = posterName || "未設定";
+
+    const msgEl = document.getElementById("msg");
+    const sectionsEl = document.getElementById("sections");
+    const selectAllBtn = document.getElementById("selectAllBtn");
+    const deselectAllBtn = document.getElementById("deselectAllBtn");
+    const selectedCountEl = document.getElementById("selectedCount");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const progressOverlay = document.getElementById("progressOverlay");
+    const progressText = document.getElementById("progressText");
+    const progressFill = document.getElementById("progressFill");
+
+    let allPosts = [];
+    let selectedPosts = new Set();
+
+    const setMsg = (t) => msgEl.textContent = t;
+
+    const updateSelectionUI = () => {
+      const count = selectedPosts.size;
+      if (count > 0) {
+        selectedCountEl.textContent = `${count}件選択中`;
+        selectedCountEl.classList.add('show');
+        downloadBtn.classList.add('show');
+      } else {
+        selectedCountEl.classList.remove('show');
+        downloadBtn.classList.remove('show');
+      }
+    };
+
+    const toggleSelection = (postId) => {
+      if (selectedPosts.has(postId)) {
+        selectedPosts.delete(postId);
+      } else {
+        selectedPosts.add(postId);
+      }
+      updateSelectionUI();
+      
+      const card = document.querySelector(`[data-post-id="${postId}"]`);
+      if (card) {
+        if (selectedPosts.has(postId)) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      }
+    };
+
+    selectAllBtn.addEventListener('click', () => {
+      allPosts.forEach(p => selectedPosts.add(p.id));
+      document.querySelectorAll('.card').forEach(card => card.classList.add('selected'));
+      updateSelectionUI();
+    });
+
+    deselectAllBtn.addEventListener('click', () => {
+      selectedPosts.clear();
+      document.querySelectorAll('.card').forEach(card => card.classList.remove('selected'));
+      updateSelectionUI();
+    });
+
+    downloadBtn.addEventListener('click', async () => {
+      if (selectedPosts.size === 0) return;
+
+      const postsToDownload = allPosts.filter(p => selectedPosts.has(p.id));
+      
+      progressOverlay.classList.add('show');
+      progressFill.style.width = '0%';
+      downloadBtn.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        const total = postsToDownload.length;
+
+        for (let i = 0; i < postsToDownload.length; i++) {
+          const post = postsToDownload[i];
+          progressText.textContent = `ダウンロード中... (${i + 1}/${total})`;
+          progressFill.style.width = `${((i) / total) * 100}%`;
+
+          const url = await signedUrl(post.object_path);
+          if (!url) continue;
+
+          const response = await fetch(url);
+          const blob = await response.blob();
+          
+          const ext = post.original_name.split('.').pop();
+          const fileName = `${post.poster_name}_${post.id}.${ext}`;
+          zip.file(fileName, blob);
+        }
+
+        progressText.textContent = 'ZIPファイルを生成中...';
+        progressFill.style.width = '90%';
+
+        const content = await zip.generateAsync({ type: 'blob' });
+        
+        progressFill.style.width = '100%';
+        progressText.textContent = '完了！';
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = `gallery_${gid}_${Date.now()}.zip`;
+        link.click();
+
+        setTimeout(() => {
+          progressOverlay.classList.remove('show');
+          downloadBtn.disabled = false;
+        }, 500);
+
+      } catch (error) {
+        alert('ダウンロードエラー: ' + error.message);
+        progressOverlay.classList.remove('show');
+        downloadBtn.disabled = false;
+      }
+    });
+
+    async function ensureAuth() {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) return true;
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) { setMsg("❌ 認証エラー: " + error.message); return false; }
+      return true;
+    }
+
+    async function signedUrl(path) {
+      const { data, error } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60);
+      if (error) return null;
+      return data.signedUrl;
+    }
+
+    function formatBytes(n) {
+      if (!n && n !== 0) return "";
+      const units = ["B","KB","MB","GB"];
+      let x = n, i = 0;
+      while (x >= 1024 && i < units.length-1) { x /= 1024; i++; }
+      return `${x.toFixed(i===0?0:1)} ${units[i]}`;
+    }
+
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diff = now - date;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+
+      if (minutes < 1) return "たった今";
+      if (minutes < 60) return `${minutes}分前`;
+      if (hours < 24) return `${hours}時間前`;
+      if (days < 7) return `${days}日前`;
+      
+      return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+    }
+
+    async function load() {
+      sectionsEl.innerHTML = "";
+      selectedPosts.clear();
+      updateSelectionUI();
+      
+      if (!gid) {
+        sectionsEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <div class="empty-text">グループに参加していません</div>
+            <div class="empty-hint">まずは参加ページからグループに参加してください</div>
+          </div>
+        `;
+        setMsg("");
+        return;
+      }
+
+      const ok = await ensureAuth();
+      if (!ok) return;
+
+      setMsg("📥 読み込み中...");
+
+      const { data: sessData, error: sessErr } = await supabase.auth.getSession();
+      if (sessErr) { setMsg("❌ セッション取得失敗: " + sessErr.message); return; }
+      const myUid = sessData.session?.user?.id || null;
+
+      const { data: posts, error } = await supabase
+        .from("posts")
+        .select("id, user_id, poster_name, type, object_path, original_name, size_bytes, created_at")
+        .eq("group_id", gid)
+        .order("created_at", { ascending: false });
+
+      if (error) { setMsg("❌ 取得失敗: " + error.message); return; }
+
+      allPosts = posts;
+
+      if (posts.length === 0) {
+        sectionsEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📸</div>
+            <div class="empty-text">まだ投稿がありません</div>
+            <div class="empty-hint">最初の投稿をアップロードしてみましょう！</div>
+          </div>
+        `;
+        setMsg("");
+        return;
+      }
+
+      // 投稿者ごとにグループ分け
+      const groupedByPoster = {};
+      posts.forEach(p => {
+        if (!groupedByPoster[p.poster_name]) {
+          groupedByPoster[p.poster_name] = [];
+        }
+        groupedByPoster[p.poster_name].push(p);
+      });
+
+      setMsg(`📊 ${posts.length}件の投稿（${Object.keys(groupedByPoster).length}人）`);
+
+      // 各投稿者ごとにセクション作成
+      for (const [name, personPosts] of Object.entries(groupedByPoster)) {
+        const section = document.createElement("div");
+        section.className = "person-section";
+
+        const headerHtml = `
+          <div class="person-header">
+            <div class="person-info">
+              <div class="person-avatar">👤</div>
+              <div class="person-details">
+                <h3>${name}</h3>
+                <div class="person-count">${personPosts.length}件の投稿</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        const grid = document.createElement("div");
+        grid.className = "grid";
+
+        for (const p of personPosts) {
+          const url = await signedUrl(p.object_path);
+          const card = document.createElement("div");
+          card.className = "card";
+          card.setAttribute('data-post-id', p.id);
+
+          const canDelete = myUid && p.user_id === myUid;
+
+          let mediaHtml = `<div style="padding:40px 20px;text-align:center;color:#999;">URL生成失敗</div>`;
+          if (url) {
+            mediaHtml = `
+              <div class="media-container" data-select="${p.id}">
+                ${p.type === "video" 
+                  ? `<video controls src="${url}"></video>` 
+                  : `<img src="${url}" alt="${p.original_name}">`
+                }
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="selection-overlay" data-select="${p.id}"></div>
+            ${mediaHtml}
+            <div class="card-content">
+              <div class="card-header">
+                <div class="poster-name">👤 ${p.poster_name}</div>
+                ${canDelete ? `<button class="btn-delete" data-del="${p.id}">🗑️ 削除</button>` : ''}
+              </div>
+              <div class="card-meta">
+                <div class="meta-row">
+                  <span>🕐 ${formatDate(p.created_at)}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="type-badge">${p.type === 'video' ? '🎥 動画' : '📷 画像'}</span>
+                  <span>${formatBytes(p.size_bytes)}</span>
+                </div>
+                <div class="meta-row">
+                  <span>📄 ${p.original_name || 'ファイル名なし'}</span>
+                </div>
+              </div>
+            </div>
+          `;
+
+          const selectElements = card.querySelectorAll(`[data-select="${p.id}"]`);
+          selectElements.forEach(el => {
+            el.addEventListener('click', (e) => {
+              e.stopPropagation();
+              toggleSelection(p.id);
+            });
+          });
+
+          if (canDelete) {
+            const btn = card.querySelector(`[data-del="${p.id}"]`);
+            btn.onclick = async (e) => {
+              e.stopPropagation();
+              if (!confirm("この投稿を削除しますか？")) return;
+
+              btn.disabled = true;
+              btn.textContent = "削除中...";
+              setMsg("🗑️ 削除中...");
+
+              const { error: rmErr } = await supabase.storage.from("media").remove([p.object_path]);
+              if (rmErr) { 
+                setMsg("❌ Storage削除失敗: " + rmErr.message); 
+                btn.disabled = false;
+                btn.textContent = "🗑️ 削除";
+                return; 
+              }
+
+              const { error: delErr } = await supabase.from("posts").delete().eq("id", p.id);
+              if (delErr) { 
+                setMsg("❌ posts削除失敗: " + delErr.message); 
+                btn.disabled = false;
+                btn.textContent = "🗑️ 削除";
+                return; 
+              }
+
+              setMsg("✅ 削除完了");
+              setTimeout(() => load(), 500);
+            };
+          }
+
+          grid.appendChild(card);
+        }
+
+        section.innerHTML = headerHtml;
+        section.appendChild(grid);
+        sectionsEl.appendChild(section);
+      }
+    }
+
+    document.getElementById("reloadBtn").onclick = load;
+
+    load();
+  </script>
+</body>
+</html>
