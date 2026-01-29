@@ -73,63 +73,6 @@
       transform: scale(0.95);
     }
     
-    .selection-controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    
-    .btn-select {
-      padding: 8px 16px;
-      background: #f0f0f0;
-      color: #666;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-select:active {
-      transform: scale(0.95);
-    }
-    
-    .btn-download {
-      padding: 8px 16px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: none;
-    }
-    .btn-download.show {
-      display: block;
-    }
-    .btn-download:active {
-      transform: scale(0.95);
-    }
-    .btn-download:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-    
-    .selected-count {
-      padding: 8px 12px;
-      background: #e8eeff;
-      color: #667eea;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      display: none;
-    }
-    .selected-count.show {
-      display: block;
-    }
-    
     .status-message {
       background: white;
       border-radius: 12px;
@@ -189,60 +132,30 @@
     
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
     }
     
     .card {
       background: white;
-      border-radius: 16px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       transition: transform 0.2s, box-shadow 0.2s;
       position: relative;
-    }
-    .card.selected {
-      box-shadow: 0 0 0 3px #667eea;
-    }
-    
-    .selection-overlay {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      width: 32px;
-      height: 32px;
-      background: white;
-      border: 3px solid #ddd;
-      border-radius: 50%;
       cursor: pointer;
-      z-index: 10;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
-    .card.selected .selection-overlay {
-      background: #667eea;
-      border-color: #667eea;
-    }
-    .selection-overlay::after {
-      content: '✓';
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      display: none;
-    }
-    .card.selected .selection-overlay::after {
-      display: block;
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     }
     
     .media-container {
       position: relative;
       width: 100%;
-      padding-top: 75%;
+      padding-top: 100%;
       background: #f5f5f5;
       overflow: hidden;
-      cursor: pointer;
     }
     .media-container img,
     .media-container video {
@@ -254,59 +167,69 @@
       object-fit: cover;
     }
     
-    .card-content {
-      padding: 12px;
-    }
-    
-    .card-header {
+    .card-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.2s;
     }
-    .poster-name {
-      font-weight: 600;
-      color: #333;
-      font-size: 15px;
+    .card:hover .card-actions {
+      opacity: 1;
     }
     
+    .btn-download-single,
     .btn-delete {
-      padding: 6px 12px;
-      background: #fee2e2;
-      color: #991b1b;
+      padding: 6px 10px;
       border: none;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-download-single {
+      background: rgba(16, 185, 129, 0.9);
+      color: white;
+    }
+    .btn-download-single:active {
+      background: rgba(5, 150, 105, 0.9);
+    }
+    
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
     }
     .btn-delete:active {
-      background: #fecaca;
+      background: rgba(220, 38, 38, 0.9);
+    }
+    
+    .card-footer {
+      padding: 8px;
+      background: white;
+      border-top: 1px solid #f0f0f0;
     }
     
     .card-meta {
-      font-size: 12px;
+      font-size: 11px;
       color: #999;
-      line-height: 1.6;
-    }
-    .meta-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-    .meta-row:last-child {
-      margin-bottom: 0;
+      justify-content: space-between;
     }
     
     .type-badge {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 2px 6px;
       background: #e8eeff;
       color: #667eea;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
     }
     
@@ -342,6 +265,7 @@
       display: flex;
       justify-content: space-around;
       padding: 12px 0;
+      z-index: 100;
     }
     .nav a {
       text-decoration: none;
@@ -361,46 +285,93 @@
       background: #e8eeff;
     }
     
-    .progress-overlay {
+    .lightbox {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.95);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      padding: 20px;
     }
-    .progress-overlay.show {
+    .lightbox.show {
       display: flex;
     }
-    .progress-content {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      min-width: 300px;
+    
+    .lightbox-content {
+      max-width: 90vw;
+      max-height: 90vh;
+      position: relative;
+    }
+    
+    .lightbox-content img,
+    .lightbox-content video {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .lightbox-close {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+    
+    .lightbox-info {
+      position: absolute;
+      bottom: -50px;
+      left: 0;
+      right: 0;
       text-align: center;
+      color: white;
+      font-size: 14px;
     }
-    .progress-text {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 16px;
+    
+    .lightbox-actions {
+      position: absolute;
+      bottom: -90px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+    }
+    
+    .lightbox-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
     }
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #e0e0e0;
-      border-radius: 4px;
-      overflow: hidden;
+    
+    .lightbox-download {
+      background: rgba(16, 185, 129, 0.9);
+      color: white;
     }
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      width: 0%;
-      transition: width 0.3s;
+    
+    .lightbox-delete {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
     }
   </style>
 </head>
@@ -417,12 +388,6 @@
     <div class="controls-card">
       <div class="controls-row">
         <button class="btn-reload" id="reloadBtn">🔄 更新</button>
-        <div class="selection-controls">
-          <button class="btn-select" id="selectAllBtn">☑️ すべて選択</button>
-          <button class="btn-select" id="deselectAllBtn">⬜ 選択解除</button>
-          <span class="selected-count" id="selectedCount">0件選択中</span>
-          <button class="btn-download" id="downloadBtn">💾 ダウンロード</button>
-        </div>
       </div>
     </div>
 
@@ -430,12 +395,11 @@
     <div id="sections"></div>
   </div>
 
-  <div class="progress-overlay" id="progressOverlay">
-    <div class="progress-content">
-      <div class="progress-text" id="progressText">ダウンロード中...</div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content" id="lightboxContent">
+      <button class="lightbox-close" id="lightboxClose">×</button>
+      <div class="lightbox-info" id="lightboxInfo"></div>
+      <div class="lightbox-actions" id="lightboxActions"></div>
     </div>
   </div>
 
@@ -445,7 +409,6 @@
     <a href="./gallery.html" class="active">🖼️ ギャラリー</a>
   </nav>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
@@ -461,114 +424,106 @@
 
     const msgEl = document.getElementById("msg");
     const sectionsEl = document.getElementById("sections");
-    const selectAllBtn = document.getElementById("selectAllBtn");
-    const deselectAllBtn = document.getElementById("deselectAllBtn");
-    const selectedCountEl = document.getElementById("selectedCount");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const progressOverlay = document.getElementById("progressOverlay");
-    const progressText = document.getElementById("progressText");
-    const progressFill = document.getElementById("progressFill");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxContent = document.getElementById("lightboxContent");
+    const lightboxInfo = document.getElementById("lightboxInfo");
+    const lightboxActions = document.getElementById("lightboxActions");
+    const lightboxClose = document.getElementById("lightboxClose");
 
     let allPosts = [];
-    let selectedPosts = new Set();
+    let currentPost = null;
 
     const setMsg = (t) => msgEl.textContent = t;
 
-    const updateSelectionUI = () => {
-      const count = selectedPosts.size;
-      if (count > 0) {
-        selectedCountEl.textContent = `${count}件選択中`;
-        selectedCountEl.classList.add('show');
-        downloadBtn.classList.add('show');
-      } else {
-        selectedCountEl.classList.remove('show');
-        downloadBtn.classList.remove('show');
+    lightboxClose.onclick = () => {
+      lightbox.classList.remove('show');
+      currentPost = null;
+    };
+
+    lightbox.onclick = (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.remove('show');
+        currentPost = null;
       }
     };
 
-    const toggleSelection = (postId) => {
-      if (selectedPosts.has(postId)) {
-        selectedPosts.delete(postId);
-      } else {
-        selectedPosts.add(postId);
-      }
-      updateSelectionUI();
+    const openLightbox = (post, url, canDelete) => {
+      currentPost = post;
       
-      const card = document.querySelector(`[data-post-id="${postId}"]`);
-      if (card) {
-        if (selectedPosts.has(postId)) {
-          card.classList.add('selected');
-        } else {
-          card.classList.remove('selected');
-        }
+      const mediaHtml = post.type === "video" 
+        ? `<video controls src="${url}" autoplay></video>` 
+        : `<img src="${url}" alt="${post.original_name}">`;
+      
+      lightboxContent.innerHTML = `
+        <button class="lightbox-close" id="lightboxCloseBtn">×</button>
+        ${mediaHtml}
+        <div class="lightbox-info">${post.poster_name} - ${formatDate(post.created_at)}</div>
+        <div class="lightbox-actions" id="lightboxActionsContainer"></div>
+      `;
+
+      const actionsContainer = lightboxContent.querySelector('#lightboxActionsContainer');
+      
+      const downloadBtn = document.createElement('button');
+      downloadBtn.className = 'lightbox-btn lightbox-download';
+      downloadBtn.textContent = '💾 ダウンロード';
+      downloadBtn.onclick = () => downloadSingle(post, url);
+      actionsContainer.appendChild(downloadBtn);
+
+      if (canDelete) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'lightbox-btn lightbox-delete';
+        deleteBtn.textContent = '🗑️ 削除';
+        deleteBtn.onclick = () => deletePost(post.id);
+        actionsContainer.appendChild(deleteBtn);
       }
+
+      lightboxContent.querySelector('#lightboxCloseBtn').onclick = () => {
+        lightbox.classList.remove('show');
+      };
+
+      lightbox.classList.add('show');
     };
 
-    selectAllBtn.addEventListener('click', () => {
-      allPosts.forEach(p => selectedPosts.add(p.id));
-      document.querySelectorAll('.card').forEach(card => card.classList.add('selected'));
-      updateSelectionUI();
-    });
-
-    deselectAllBtn.addEventListener('click', () => {
-      selectedPosts.clear();
-      document.querySelectorAll('.card').forEach(card => card.classList.remove('selected'));
-      updateSelectionUI();
-    });
-
-    downloadBtn.addEventListener('click', async () => {
-      if (selectedPosts.size === 0) return;
-
-      const postsToDownload = allPosts.filter(p => selectedPosts.has(p.id));
-      
-      progressOverlay.classList.add('show');
-      progressFill.style.width = '0%';
-      downloadBtn.disabled = true;
-
+    const downloadSingle = async (post, url) => {
       try {
-        const zip = new JSZip();
-        const total = postsToDownload.length;
-
-        for (let i = 0; i < postsToDownload.length; i++) {
-          const post = postsToDownload[i];
-          progressText.textContent = `ダウンロード中... (${i + 1}/${total})`;
-          progressFill.style.width = `${((i) / total) * 100}%`;
-
-          const url = await signedUrl(post.object_path);
-          if (!url) continue;
-
-          const response = await fetch(url);
-          const blob = await response.blob();
-          
-          const ext = post.original_name.split('.').pop();
-          const fileName = `${post.poster_name}_${post.id}.${ext}`;
-          zip.file(fileName, blob);
-        }
-
-        progressText.textContent = 'ZIPファイルを生成中...';
-        progressFill.style.width = '90%';
-
-        const content = await zip.generateAsync({ type: 'blob' });
+        const response = await fetch(url);
+        const blob = await response.blob();
         
-        progressFill.style.width = '100%';
-        progressText.textContent = '完了！';
-
         const link = document.createElement('a');
-        link.href = URL.createObjectURL(content);
-        link.download = `gallery_${gid}_${Date.now()}.zip`;
+        link.href = URL.createObjectURL(blob);
+        link.download = post.original_name || `${post.poster_name}_${post.id}.${post.type === 'video' ? 'mp4' : 'jpg'}`;
         link.click();
-
-        setTimeout(() => {
-          progressOverlay.classList.remove('show');
-          downloadBtn.disabled = false;
-        }, 500);
-
+        
+        URL.revokeObjectURL(link.href);
       } catch (error) {
         alert('ダウンロードエラー: ' + error.message);
-        progressOverlay.classList.remove('show');
-        downloadBtn.disabled = false;
       }
-    });
+    };
+
+    const deletePost = async (postId) => {
+      if (!confirm("この投稿を削除しますか？")) return;
+
+      const post = allPosts.find(p => p.id === postId);
+      if (!post) return;
+
+      setMsg("🗑️ 削除中...");
+      lightbox.classList.remove('show');
+
+      const { error: rmErr } = await supabase.storage.from("media").remove([post.object_path]);
+      if (rmErr) { 
+        setMsg("❌ Storage削除失敗: " + rmErr.message); 
+        return; 
+      }
+
+      const { error: delErr } = await supabase.from("posts").delete().eq("id", postId);
+      if (delErr) { 
+        setMsg("❌ posts削除失敗: " + delErr.message); 
+        return; 
+      }
+
+      setMsg("✅ 削除完了");
+      setTimeout(() => load(), 500);
+    };
 
     async function ensureAuth() {
       const { data } = await supabase.auth.getSession();
@@ -582,14 +537,6 @@
       const { data, error } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60);
       if (error) return null;
       return data.signedUrl;
-    }
-
-    function formatBytes(n) {
-      if (!n && n !== 0) return "";
-      const units = ["B","KB","MB","GB"];
-      let x = n, i = 0;
-      while (x >= 1024 && i < units.length-1) { x /= 1024; i++; }
-      return `${x.toFixed(i===0?0:1)} ${units[i]}`;
     }
 
     function formatDate(dateStr) {
@@ -610,8 +557,6 @@
 
     async function load() {
       sectionsEl.innerHTML = "";
-      selectedPosts.clear();
-      updateSelectionUI();
       
       if (!gid) {
         sectionsEl.innerHTML = `
@@ -656,7 +601,6 @@
         return;
       }
 
-      // 投稿者ごとにグループ分け
       const groupedByPoster = {};
       posts.forEach(p => {
         if (!groupedByPoster[p.poster_name]) {
@@ -667,7 +611,6 @@
 
       setMsg(`📊 ${posts.length}件の投稿（${Object.keys(groupedByPoster).length}人）`);
 
-      // 各投稿者ごとにセクション作成
       for (const [name, personPosts] of Object.entries(groupedByPoster)) {
         const section = document.createElement("div");
         section.className = "person-section";
@@ -689,83 +632,50 @@
 
         for (const p of personPosts) {
           const url = await signedUrl(p.object_path);
+          if (!url) continue;
+
           const card = document.createElement("div");
           card.className = "card";
-          card.setAttribute('data-post-id', p.id);
 
           const canDelete = myUid && p.user_id === myUid;
 
-          let mediaHtml = `<div style="padding:40px 20px;text-align:center;color:#999;">URL生成失敗</div>`;
-          if (url) {
-            mediaHtml = `
-              <div class="media-container" data-select="${p.id}">
-                ${p.type === "video" 
-                  ? `<video controls src="${url}"></video>` 
-                  : `<img src="${url}" alt="${p.original_name}">`
-                }
-              </div>
-            `;
-          }
+          const mediaHtml = p.type === "video" 
+            ? `<video src="${url}"></video>` 
+            : `<img src="${url}" alt="${p.original_name}">`;
 
           card.innerHTML = `
-            <div class="selection-overlay" data-select="${p.id}"></div>
-            ${mediaHtml}
-            <div class="card-content">
-              <div class="card-header">
-                <div class="poster-name">👤 ${p.poster_name}</div>
-                ${canDelete ? `<button class="btn-delete" data-del="${p.id}">🗑️ 削除</button>` : ''}
-              </div>
+            <div class="media-container">
+              ${mediaHtml}
+            </div>
+            <div class="card-actions">
+              <button class="btn-download-single" data-download="${p.id}">💾</button>
+              ${canDelete ? `<button class="btn-delete" data-delete="${p.id}">🗑️</button>` : ''}
+            </div>
+            <div class="card-footer">
               <div class="card-meta">
-                <div class="meta-row">
-                  <span>🕐 ${formatDate(p.created_at)}</span>
-                </div>
-                <div class="meta-row">
-                  <span class="type-badge">${p.type === 'video' ? '🎥 動画' : '📷 画像'}</span>
-                  <span>${formatBytes(p.size_bytes)}</span>
-                </div>
-                <div class="meta-row">
-                  <span>📄 ${p.original_name || 'ファイル名なし'}</span>
-                </div>
+                <span>${formatDate(p.created_at)}</span>
+                <span class="type-badge">${p.type === 'video' ? '🎥' : '📷'}</span>
               </div>
             </div>
           `;
 
-          const selectElements = card.querySelectorAll(`[data-select="${p.id}"]`);
-          selectElements.forEach(el => {
-            el.addEventListener('click', (e) => {
+          card.querySelector('.media-container').onclick = () => {
+            openLightbox(p, url, canDelete);
+          };
+
+          const downloadBtn = card.querySelector(`[data-download="${p.id}"]`);
+          if (downloadBtn) {
+            downloadBtn.onclick = (e) => {
               e.stopPropagation();
-              toggleSelection(p.id);
-            });
-          });
+              downloadSingle(p, url);
+            };
+          }
 
-          if (canDelete) {
-            const btn = card.querySelector(`[data-del="${p.id}"]`);
-            btn.onclick = async (e) => {
+          const deleteBtn = card.querySelector(`[data-delete="${p.id}"]`);
+          if (deleteBtn) {
+            deleteBtn.onclick = (e) => {
               e.stopPropagation();
-              if (!confirm("この投稿を削除しますか？")) return;
-
-              btn.disabled = true;
-              btn.textContent = "削除中...";
-              setMsg("🗑️ 削除中...");
-
-              const { error: rmErr } = await supabase.storage.from("media").remove([p.object_path]);
-              if (rmErr) { 
-                setMsg("❌ Storage削除失敗: " + rmErr.message); 
-                btn.disabled = false;
-                btn.textContent = "🗑️ 削除";
-                return; 
-              }
-
-              const { error: delErr } = await supabase.from("posts").delete().eq("id", p.id);
-              if (delErr) { 
-                setMsg("❌ posts削除失敗: " + delErr.message); 
-                btn.disabled = false;
-                btn.textContent = "🗑️ 削除";
-                return; 
-              }
-
-              setMsg("✅ 削除完了");
-              setTimeout(() => load(), 500);
+              deletePost(p.id);
             };
           }
 

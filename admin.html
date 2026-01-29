@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>管理者：グループ作成</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", Meiryo, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 28px;
+      color: white;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header p {
+      color: rgba(255,255,255,0.9);
+      font-size: 14px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group:last-of-type {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.2s;
+      background: white;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    input::placeholder {
+      color: #aaa;
+    }
+    
+    .btn-create {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .btn-create:active {
+      transform: scale(0.98);
+    }
+    .btn-create:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: none;
+      animation: slideIn 0.3s;
+    }
+    .message.show {
+      display: block;
+    }
+    .message.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    .message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    .message.info {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
+    }
+    
+    .result-box {
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      display: none;
+    }
+    .result-box.show {
+      display: block;
+      animation: slideIn 0.3s;
+    }
+    .result-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .result-item:last-child {
+      margin-bottom: 0;
+    }
+    .result-label {
+      font-weight: 600;
+      color: #64748b;
+      min-width: 100px;
+    }
+    .result-value {
+      font-family: 'Courier New', monospace;
+      background: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      color: #667eea;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    
+    .notice {
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .notice-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .notice-text {
+      font-size: 13px;
+      color: #78350f;
+      line-height: 1.6;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔐 管理者パネル</h1>
+      <p>新しいグループを作成</p>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label>🔑 管理者キー</label>
+        <input id="adminKey" type="password" placeholder="SQLで設定した管理者キーを入力">
+      </div>
+
+      <div class="form-group">
+        <label>👥 グループ名</label>
+        <input id="groupName" placeholder="例：yakinikuzyun">
+      </div>
+
+      <div class="form-group">
+        <label>🔒 グループパスワード</label>
+        <input id="groupPw" type="password" placeholder="参加者が入力するパスワード">
+      </div>
+
+      <button class="btn-create" id="createBtn">✨ グループを作成</button>
+
+      <div id="msg" class="message"></div>
+      <div id="result" class="result-box"></div>
+
+      <div class="notice">
+        <div class="notice-title">
+          <span>⚠️</span>
+          <span>重要な注意事項</span>
+        </div>
+        <div class="notice-text">
+          このページは管理者専用です。URLを他の人に共有しないでください。<br>
+          作成後に表示されるgroup_idはシステム内部で使用されます。参加者はグループ名とパスワードで入室します。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://bruxurxlvmnculmsvqwo.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJydXh1cnhsdm1uY3VsbXN2cXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNTY4MzEsImV4cCI6MjA4NDczMjgzMX0.SsuD6zomVOdxtA7YS_LeodelnstYiOgDo5lA8nkl46I";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const msgEl = document.getElementById("msg");
+    const resEl = document.getElementById("result");
+    const createBtn = document.getElementById("createBtn");
+
+    const setMsg = (text, type) => {
+      msgEl.textContent = text;
+      msgEl.className = `message show ${type}`;
+    };
+
+    const hideMsg = () => {
+      msgEl.className = "message";
+    };
+
+    const showResult = (groupId, groupName) => {
+      resEl.innerHTML = `
+        <div class="result-item">
+          <span class="result-label">📋 Group ID:</span>
+          <span class="result-value">${groupId}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">👥 グループ名:</span>
+          <span class="result-value">${groupName}</span>
+        </div>
+      `;
+      resEl.className = "result-box show";
+    };
+
+    createBtn.onclick = async () => {
+      hideMsg();
+      resEl.className = "result-box";
+
+      const adminKey = document.getElementById("adminKey").value.trim();
+      const groupName = document.getElementById("groupName").value.trim();
+      const groupPw = document.getElementById("groupPw").value.trim();
+
+      if (!adminKey || !groupName || !groupPw) {
+        return setMsg("すべての項目を入力してください", "error");
+      }
+
+      createBtn.disabled = true;
+      createBtn.textContent = "作成中...";
+      setMsg("グループを作成しています...", "info");
+
+      try {
+        const { error: authErr } = await supabase.auth.signInAnonymously();
+        if (authErr) {
+          throw new Error("認証エラー: " + authErr.message);
+        }
+
+        const { data, error } = await supabase.rpc("create_group", {
+          p_group_name: groupName,
+          p_password: groupPw,
+          p_admin_key: adminKey
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        setMsg("✅ グループの作成に成功しました！", "success");
+        showResult(data, groupName);
+
+        document.getElementById("adminKey").value = "";
+        document.getElementById("groupName").value = "";
+        document.getElementById("groupPw").value = "";
+
+      } catch (error) {
+        setMsg("❌ エラー: " + error.message, "error");
+      } finally {
+        createBtn.disabled = false;
+        createBtn.textContent = "✨ グループを作成";
+      }
+    };
+
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          createBtn.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

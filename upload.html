@@ -38,7 +38,7 @@
     }
     
     .container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 20px auto;
       padding: 0 16px;
     }
@@ -95,36 +95,65 @@
       display: block;
     }
     
-    .preview-container {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #f5f5f5;
-      margin-bottom: 12px;
-    }
-    .preview-container img,
-    .preview-container video {
-      width: 100%;
-      display: block;
-      max-height: 400px;
-      object-fit: contain;
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
     }
     
-    .file-info {
+    .preview-item {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f5f5f5;
+      aspect-ratio: 1;
+    }
+    
+    .preview-item img,
+    .preview-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+    
+    .preview-type {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    
+    .file-summary {
       background: #f8f9fa;
       padding: 12px;
       border-radius: 8px;
       font-size: 14px;
       color: #666;
       margin-bottom: 16px;
-    }
-    .file-info-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-    .file-info-row:last-child {
-      margin-bottom: 0;
+      text-align: center;
     }
     
     button {
@@ -200,6 +229,17 @@
       transition: width 0.3s;
     }
     
+    .progress-text {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+      display: none;
+    }
+    .progress-text.show {
+      display: block;
+    }
+    
     .nav {
       position: fixed;
       bottom: 0;
@@ -220,8 +260,13 @@
       border-radius: 8px;
       transition: all 0.2s;
     }
+    .nav a.active {
+      background: #f0f4ff;
+      color: #667eea;
+      font-weight: 600;
+    }
     .nav a:active {
-      background: #f0f0f0;
+      background: #e8eeff;
     }
   </style>
 </head>
@@ -239,22 +284,23 @@
       <div class="file-upload-area" id="uploadArea">
         <div class="upload-icon">📸</div>
         <div class="upload-text">タップして写真・動画を選択</div>
-        <div class="upload-hint">またはドラッグ&ドロップ（最大100MB）</div>
+        <div class="upload-hint">複数選択可能 / ドラッグ&ドロップ対応（各100MB以下）</div>
       </div>
-      <input id="fileInput" type="file" accept="image/*,video/*" />
+      <input id="fileInput" type="file" accept="image/*,video/*" multiple />
       
       <div class="preview-area" id="previewArea">
-        <div class="preview-container" id="previewContainer"></div>
-        <div class="file-info" id="fileInfo"></div>
+        <div class="file-summary" id="fileSummary"></div>
+        <div class="preview-grid" id="previewGrid"></div>
         
         <button class="btn-primary" id="uploadBtn">
           <span id="uploadBtnText">📤 アップロード</span>
         </button>
-        <button class="btn-secondary" id="cancelBtn">✕ キャンセル</button>
+        <button class="btn-secondary" id="cancelBtn">✕ すべてキャンセル</button>
         
         <div class="progress-bar" id="progressBar">
           <div class="progress-fill" id="progressFill"></div>
         </div>
+        <div class="progress-text" id="progressText"></div>
       </div>
       
       <div class="message" id="message"></div>
@@ -263,7 +309,7 @@
 
   <nav class="nav">
     <a href="./join.html">👥 参加</a>
-    <a href="./upload.html">📤 アップロード</a>
+    <a href="./upload.html" class="active">📤 アップロード</a>
     <a href="./gallery.html">🖼️ ギャラリー</a>
   </nav>
 
@@ -285,16 +331,17 @@
     const uploadArea = document.getElementById("uploadArea");
     const fileInput = document.getElementById("fileInput");
     const previewArea = document.getElementById("previewArea");
-    const previewContainer = document.getElementById("previewContainer");
-    const fileInfo = document.getElementById("fileInfo");
+    const previewGrid = document.getElementById("previewGrid");
+    const fileSummary = document.getElementById("fileSummary");
     const uploadBtn = document.getElementById("uploadBtn");
     const cancelBtn = document.getElementById("cancelBtn");
     const messageEl = document.getElementById("message");
     const progressBar = document.getElementById("progressBar");
     const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
     const uploadBtnText = document.getElementById("uploadBtnText");
 
-    let selectedFile = null;
+    let selectedFiles = [];
 
     const showMessage = (text, type = 'info') => {
       messageEl.textContent = text;
@@ -312,52 +359,78 @@
       return Math.round(bytes / Math.pow(k, i) * 10) / 10 + ' ' + sizes[i];
     };
 
-    const handleFile = (file) => {
-      if (!file) return;
-
-      if (file.size > MAX_BYTES) {
-        showMessage('ファイルサイズは100MB以下にしてください', 'error');
+    const updatePreview = () => {
+      if (selectedFiles.length === 0) {
+        previewArea.classList.remove('show');
         return;
       }
 
-      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-        showMessage('画像または動画ファイルを選択してください', 'error');
-        return;
-      }
+      const totalSize = selectedFiles.reduce((sum, f) => sum + f.size, 0);
+      const imageCount = selectedFiles.filter(f => f.type.startsWith('image/')).length;
+      const videoCount = selectedFiles.filter(f => f.type.startsWith('video/')).length;
 
-      selectedFile = file;
+      fileSummary.innerHTML = `
+        📊 ${selectedFiles.length}件選択中 
+        (📷 ${imageCount}枚 🎥 ${videoCount}本) 
+        合計: ${formatBytes(totalSize)}
+      `;
+
+      previewGrid.innerHTML = '';
+      selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const item = document.createElement('div');
+          item.className = 'preview-item';
+          
+          const mediaHtml = file.type.startsWith('image/')
+            ? `<img src="${e.target.result}" alt="${file.name}">`
+            : `<video src="${e.target.result}"></video>`;
+          
+          item.innerHTML = `
+            ${mediaHtml}
+            <button class="preview-remove" data-index="${index}">×</button>
+            <div class="preview-type">${file.type.startsWith('image/') ? '📷' : '🎥'}</div>
+          `;
+          
+          const removeBtn = item.querySelector('.preview-remove');
+          removeBtn.onclick = () => {
+            selectedFiles.splice(index, 1);
+            updatePreview();
+          };
+          
+          previewGrid.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      previewArea.classList.add('show');
+    };
+
+    const handleFiles = (files) => {
+      const fileArray = Array.from(files);
       
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        previewContainer.innerHTML = file.type.startsWith('image/')
-          ? `<img src="${e.target.result}" alt="プレビュー">`
-          : `<video src="${e.target.result}" controls></video>`;
-        
-        fileInfo.innerHTML = `
-          <div class="file-info-row">
-            <span>📄 ファイル名</span>
-            <span>${file.name}</span>
-          </div>
-          <div class="file-info-row">
-            <span>📊 サイズ</span>
-            <span>${formatBytes(file.size)}</span>
-          </div>
-          <div class="file-info-row">
-            <span>📝 種類</span>
-            <span>${file.type.startsWith('image/') ? '画像' : '動画'}</span>
-          </div>
-        `;
-        
-        previewArea.classList.add('show');
-      };
-      reader.readAsDataURL(file);
+      for (const file of fileArray) {
+        if (file.size > MAX_BYTES) {
+          showMessage(`${file.name}のサイズは100MB以下にしてください`, 'error');
+          continue;
+        }
+
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+          showMessage(`${file.name}は画像または動画ファイルではありません`, 'error');
+          continue;
+        }
+
+        selectedFiles.push(file);
+      }
+
+      updatePreview();
     };
 
     uploadArea.addEventListener('click', () => fileInput.click());
     
     fileInput.addEventListener('change', (e) => {
-      if (e.target.files[0]) {
-        handleFile(e.target.files[0]);
+      if (e.target.files.length > 0) {
+        handleFiles(e.target.files);
       }
     });
 
@@ -373,17 +446,15 @@
     uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
       uploadArea.classList.remove('drag-over');
-      if (e.dataTransfer.files[0]) {
-        handleFile(e.dataTransfer.files[0]);
+      if (e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
       }
     });
 
     cancelBtn.addEventListener('click', () => {
-      selectedFile = null;
+      selectedFiles = [];
       fileInput.value = '';
-      previewArea.classList.remove('show');
-      previewContainer.innerHTML = '';
-      fileInfo.innerHTML = '';
+      updatePreview();
     });
 
     const safeName = (name) => name.replace(/[^\w.\-]+/g, "_");
@@ -405,7 +476,7 @@
         return;
       }
 
-      if (!selectedFile) {
+      if (selectedFiles.length === 0) {
         showMessage("ファイルを選択してください", 'error');
         return;
       }
@@ -425,63 +496,80 @@
         return;
       }
 
-      const type = selectedFile.type.startsWith("image/") ? "image" : "video";
-      const key = `${gid}/${uid}/${Date.now()}_${safeName(selectedFile.name)}`;
-
       uploadBtn.disabled = true;
-      uploadBtnText.textContent = "アップロード中...";
+      cancelBtn.disabled = true;
       progressBar.classList.add('show');
-      progressFill.style.width = '30%';
+      progressText.classList.add('show');
 
-      const { error: upErr } = await supabase.storage
-        .from("media")
-        .upload(key, selectedFile, { upsert: false, contentType: selectedFile.type });
+      const total = selectedFiles.length;
+      let success = 0;
+      let failed = 0;
 
-      if (upErr) {
-        showMessage("アップロード失敗: " + upErr.message, 'error');
-        uploadBtn.disabled = false;
-        uploadBtnText.textContent = "📤 アップロード";
-        progressBar.classList.remove('show');
-        progressFill.style.width = '0%';
-        return;
-      }
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const progress = ((i) / total) * 100;
+        progressFill.style.width = `${progress}%`;
+        uploadBtnText.textContent = `アップロード中... (${i + 1}/${total})`;
+        progressText.textContent = `${file.name} をアップロード中...`;
 
-      progressFill.style.width = '70%';
+        try {
+          const type = file.type.startsWith("image/") ? "image" : "video";
+          const key = `${gid}/${uid}/${Date.now()}_${safeName(file.name)}`;
 
-      const { error: insErr } = await supabase.from("posts").insert([{
-        group_id: gid,
-        user_id: uid,
-        poster_name: posterName,
-        type,
-        object_path: key,
-        original_name: selectedFile.name,
-        size_bytes: selectedFile.size
-      }]);
+          const { error: upErr } = await supabase.storage
+            .from("media")
+            .upload(key, file, { upsert: false, contentType: file.type });
 
-      if (insErr) {
-        showMessage("データベース登録失敗: " + insErr.message, 'error');
-        uploadBtn.disabled = false;
-        uploadBtnText.textContent = "📤 アップロード";
-        progressBar.classList.remove('show');
-        progressFill.style.width = '0%';
-        return;
+          if (upErr) {
+            console.error(`${file.name} アップロード失敗:`, upErr);
+            failed++;
+            continue;
+          }
+
+          const { error: insErr } = await supabase.from("posts").insert([{
+            group_id: gid,
+            user_id: uid,
+            poster_name: posterName,
+            type,
+            object_path: key,
+            original_name: file.name,
+            size_bytes: file.size
+          }]);
+
+          if (insErr) {
+            console.error(`${file.name} DB登録失敗:`, insErr);
+            failed++;
+            continue;
+          }
+
+          success++;
+        } catch (error) {
+          console.error(`${file.name} エラー:`, error);
+          failed++;
+        }
       }
 
       progressFill.style.width = '100%';
+      uploadBtnText.textContent = "📤 アップロード";
+      progressText.textContent = `完了: ${success}件成功, ${failed}件失敗`;
 
-      showMessage("✅ アップロード完了！", 'success');
-      
+      if (success > 0) {
+        showMessage(`✅ ${success}件のアップロードが完了しました！`, 'success');
+      }
+      if (failed > 0) {
+        showMessage(`⚠️ ${failed}件のアップロードに失敗しました`, 'error');
+      }
+
       setTimeout(() => {
-        selectedFile = null;
+        selectedFiles = [];
         fileInput.value = '';
-        previewArea.classList.remove('show');
-        previewContainer.innerHTML = '';
-        fileInfo.innerHTML = '';
+        updatePreview();
         uploadBtn.disabled = false;
-        uploadBtnText.textContent = "📤 アップロード";
+        cancelBtn.disabled = false;
         progressBar.classList.remove('show');
+        progressText.classList.remove('show');
         progressFill.style.width = '0%';
-      }, 1500);
+      }, 2000);
     });
   </script>
 </body>
