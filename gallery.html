@@ -56,6 +56,38 @@
       gap: 12px;
       flex-wrap: wrap;
       align-items: center;
+      margin-bottom: 12px;
+    }
+    .controls-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .filter-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    select {
+      padding: 8px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      min-width: 150px;
+    }
+    select:focus {
+      outline: none;
+      border-color: #667eea;
     }
     
     .btn-reload {
@@ -73,6 +105,64 @@
       transform: scale(0.95);
     }
     
+    .selection-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    
+    .btn-select {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      color: #666;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-select:active {
+      transform: scale(0.95);
+    }
+    
+    .selected-count {
+      padding: 8px 12px;
+      background: #e8eeff;
+      color: #667eea;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+    }
+    .selected-count.show {
+      display: block;
+    }
+    
+    .btn-download-selected {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+    .btn-download-selected.show {
+      display: block;
+    }
+    .btn-download-selected:active {
+      transform: scale(0.95);
+    }
+    .btn-download-selected:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
     .status-message {
       background: white;
       border-radius: 12px;
@@ -84,50 +174,11 @@
       text-align: center;
     }
     
-    .person-section {
+    .gallery-section {
       background: white;
       border-radius: 16px;
       padding: 20px;
-      margin-bottom: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .person-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid #f0f0f0;
-    }
-    
-    .person-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .person-avatar {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      color: white;
-    }
-    
-    .person-details h3 {
-      font-size: 18px;
-      color: #333;
-      margin-bottom: 4px;
-    }
-    
-    .person-count {
-      font-size: 13px;
-      color: #999;
     }
     
     .grid {
@@ -148,6 +199,41 @@
     .card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .card.selected {
+      box-shadow: 0 0 0 3px #667eea;
+    }
+    
+    .selection-overlay {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 3px solid #ddd;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+    .card.selected .selection-overlay {
+      background: #667eea;
+      border-color: #667eea;
+    }
+    .selection-overlay::after {
+      content: '✓';
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      display: none;
+    }
+    .card.selected .selection-overlay::after {
+      display: block;
     }
     
     .media-container {
@@ -175,6 +261,7 @@
       gap: 6px;
       opacity: 0;
       transition: opacity 0.2s;
+      z-index: 9;
     }
     .card:hover .card-actions {
       opacity: 1;
@@ -373,6 +460,48 @@
       background: rgba(239, 68, 68, 0.9);
       color: white;
     }
+    
+    .progress-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+    .progress-overlay.show {
+      display: flex;
+    }
+    .progress-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      min-width: 300px;
+      text-align: center;
+    }
+    .progress-text {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.3s;
+    }
   </style>
 </head>
 <body>
@@ -387,12 +516,28 @@
   <div class="container">
     <div class="controls-card">
       <div class="controls-row">
+        <div class="filter-group">
+          <span class="filter-label">👤 投稿者</span>
+          <select id="filterSelect">
+            <option value="">全員</option>
+          </select>
+        </div>
         <button class="btn-reload" id="reloadBtn">🔄 更新</button>
+      </div>
+      <div class="controls-row">
+        <div class="selection-controls">
+          <button class="btn-select" id="selectAllBtn">☑️ すべて選択</button>
+          <button class="btn-select" id="deselectAllBtn">⬜ 選択解除</button>
+          <span class="selected-count" id="selectedCount">0件選択中</span>
+          <button class="btn-download-selected" id="downloadSelectedBtn">💾 選択した写真を保存</button>
+        </div>
       </div>
     </div>
 
     <div class="status-message" id="msg"></div>
-    <div id="sections"></div>
+    <div class="gallery-section">
+      <div class="grid" id="grid"></div>
+    </div>
   </div>
 
   <div class="lightbox" id="lightbox">
@@ -400,6 +545,15 @@
       <button class="lightbox-close" id="lightboxClose">×</button>
       <div class="lightbox-info" id="lightboxInfo"></div>
       <div class="lightbox-actions" id="lightboxActions"></div>
+    </div>
+  </div>
+
+  <div class="progress-overlay" id="progressOverlay">
+    <div class="progress-content">
+      <div class="progress-text" id="progressText">ダウンロード中...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
     </div>
   </div>
 
@@ -423,33 +577,124 @@
     document.getElementById("pname").textContent = posterName || "未設定";
 
     const msgEl = document.getElementById("msg");
-    const sectionsEl = document.getElementById("sections");
+    const gridEl = document.getElementById("grid");
+    const filterSelect = document.getElementById("filterSelect");
+    const selectAllBtn = document.getElementById("selectAllBtn");
+    const deselectAllBtn = document.getElementById("deselectAllBtn");
+    const selectedCountEl = document.getElementById("selectedCount");
+    const downloadSelectedBtn = document.getElementById("downloadSelectedBtn");
     const lightbox = document.getElementById("lightbox");
     const lightboxContent = document.getElementById("lightboxContent");
-    const lightboxInfo = document.getElementById("lightboxInfo");
-    const lightboxActions = document.getElementById("lightboxActions");
     const lightboxClose = document.getElementById("lightboxClose");
+    const progressOverlay = document.getElementById("progressOverlay");
+    const progressText = document.getElementById("progressText");
+    const progressFill = document.getElementById("progressFill");
 
     let allPosts = [];
-    let currentPost = null;
+    let displayedPosts = [];
+    let selectedPosts = new Set();
 
     const setMsg = (t) => msgEl.textContent = t;
 
-    lightboxClose.onclick = () => {
-      lightbox.classList.remove('show');
-      currentPost = null;
-    };
-
-    lightbox.onclick = (e) => {
-      if (e.target === lightbox) {
-        lightbox.classList.remove('show');
-        currentPost = null;
+    const updateSelectionUI = () => {
+      const count = selectedPosts.size;
+      if (count > 0) {
+        selectedCountEl.textContent = `${count}件選択中`;
+        selectedCountEl.classList.add('show');
+        downloadSelectedBtn.classList.add('show');
+      } else {
+        selectedCountEl.classList.remove('show');
+        downloadSelectedBtn.classList.remove('show');
       }
     };
 
-    const openLightbox = (post, url, canDelete) => {
-      currentPost = post;
+    const toggleSelection = (postId) => {
+      if (selectedPosts.has(postId)) {
+        selectedPosts.delete(postId);
+      } else {
+        selectedPosts.add(postId);
+      }
+      updateSelectionUI();
       
+      const card = document.querySelector(`[data-post-id="${postId}"]`);
+      if (card) {
+        if (selectedPosts.has(postId)) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      }
+    };
+
+    selectAllBtn.addEventListener('click', () => {
+      displayedPosts.forEach(p => selectedPosts.add(p.id));
+      document.querySelectorAll('.card').forEach(card => card.classList.add('selected'));
+      updateSelectionUI();
+    });
+
+    deselectAllBtn.addEventListener('click', () => {
+      selectedPosts.clear();
+      document.querySelectorAll('.card').forEach(card => card.classList.remove('selected'));
+      updateSelectionUI();
+    });
+
+    lightboxClose.onclick = () => lightbox.classList.remove('show');
+    lightbox.onclick = (e) => {
+      if (e.target === lightbox) lightbox.classList.remove('show');
+    };
+
+    const downloadSingle = async (post, url) => {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = post.original_name || `${post.poster_name}_${post.id}.${post.type === 'video' ? 'mp4' : 'jpg'}`;
+        link.click();
+        
+        URL.revokeObjectURL(link.href);
+      } catch (error) {
+        alert('ダウンロードエラー: ' + error.message);
+      }
+    };
+
+    const downloadSelected = async () => {
+      if (selectedPosts.size === 0) return;
+
+      const postsToDownload = allPosts.filter(p => selectedPosts.has(p.id));
+
+      downloadSelectedBtn.disabled = true;
+      progressOverlay.classList.add('show');
+      progressFill.style.width = '0%';
+
+      const total = postsToDownload.length;
+      
+      for (let i = 0; i < postsToDownload.length; i++) {
+        const post = postsToDownload[i];
+        progressText.textContent = `ダウンロード中... (${i + 1}/${total})`;
+        progressFill.style.width = `${((i) / total) * 100}%`;
+
+        const url = await signedUrl(post.object_path);
+        if (!url) continue;
+
+        await downloadSingle(post, url);
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      progressFill.style.width = '100%';
+      progressText.textContent = '完了！';
+
+      setTimeout(() => {
+        progressOverlay.classList.remove('show');
+        downloadSelectedBtn.disabled = false;
+      }, 1000);
+    };
+
+    downloadSelectedBtn.addEventListener('click', downloadSelected);
+
+    const openLightbox = (post, url, canDelete) => {
       const mediaHtml = post.type === "video" 
         ? `<video controls src="${url}" autoplay></video>` 
         : `<img src="${url}" alt="${post.original_name}">`;
@@ -482,22 +727,6 @@
       };
 
       lightbox.classList.add('show');
-    };
-
-    const downloadSingle = async (post, url) => {
-      try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = post.original_name || `${post.poster_name}_${post.id}.${post.type === 'video' ? 'mp4' : 'jpg'}`;
-        link.click();
-        
-        URL.revokeObjectURL(link.href);
-      } catch (error) {
-        alert('ダウンロードエラー: ' + error.message);
-      }
     };
 
     const deletePost = async (postId) => {
@@ -555,11 +784,98 @@
       return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
     }
 
-    async function load() {
-      sectionsEl.innerHTML = "";
+    async function renderGallery() {
+      gridEl.innerHTML = "";
+      selectedPosts.clear();
+      updateSelectionUI();
       
+      const filterValue = filterSelect.value;
+      displayedPosts = filterValue 
+        ? allPosts.filter(p => p.poster_name === filterValue)
+        : allPosts;
+
+      if (displayedPosts.length === 0) {
+        gridEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📸</div>
+            <div class="empty-text">投稿がありません</div>
+            <div class="empty-hint">条件を変更するか、新しい投稿をアップロードしてみましょう</div>
+          </div>
+        `;
+        setMsg("");
+        return;
+      }
+
+      setMsg(`📊 ${displayedPosts.length}件の投稿を表示中`);
+
+      const { data: sessData } = await supabase.auth.getSession();
+      const myUid = sessData.session?.user?.id || null;
+
+      for (const p of displayedPosts) {
+        const url = await signedUrl(p.object_path);
+        if (!url) continue;
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.setAttribute('data-post-id', p.id);
+
+        const canDelete = myUid && p.user_id === myUid;
+
+        const mediaHtml = p.type === "video" 
+          ? `<video src="${url}"></video>` 
+          : `<img src="${url}" alt="${p.original_name}">`;
+
+        card.innerHTML = `
+          <div class="selection-overlay" data-select="${p.id}"></div>
+          <div class="media-container" data-view="${p.id}">
+            ${mediaHtml}
+          </div>
+          <div class="card-actions">
+            <button class="btn-download-single" data-download="${p.id}">💾</button>
+            ${canDelete ? `<button class="btn-delete" data-delete="${p.id}">🗑️</button>` : ''}
+          </div>
+          <div class="card-footer">
+            <div class="card-meta">
+              <span>${formatDate(p.created_at)}</span>
+              <span class="type-badge">${p.type === 'video' ? '🎥' : '📷'}</span>
+            </div>
+          </div>
+        `;
+
+        const selectOverlay = card.querySelector(`[data-select="${p.id}"]`);
+        selectOverlay.onclick = (e) => {
+          e.stopPropagation();
+          toggleSelection(p.id);
+        };
+
+        const mediaContainer = card.querySelector(`[data-view="${p.id}"]`);
+        mediaContainer.onclick = () => {
+          openLightbox(p, url, canDelete);
+        };
+
+        const downloadBtn = card.querySelector(`[data-download="${p.id}"]`);
+        if (downloadBtn) {
+          downloadBtn.onclick = (e) => {
+            e.stopPropagation();
+            downloadSingle(p, url);
+          };
+        }
+
+        const deleteBtn = card.querySelector(`[data-delete="${p.id}"]`);
+        if (deleteBtn) {
+          deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deletePost(p.id);
+          };
+        }
+
+        gridEl.appendChild(card);
+      }
+    }
+
+    async function load() {
       if (!gid) {
-        sectionsEl.innerHTML = `
+        gridEl.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">👥</div>
             <div class="empty-text">グループに参加していません</div>
@@ -575,10 +891,6 @@
 
       setMsg("📥 読み込み中...");
 
-      const { data: sessData, error: sessErr } = await supabase.auth.getSession();
-      if (sessErr) { setMsg("❌ セッション取得失敗: " + sessErr.message); return; }
-      const myUid = sessData.session?.user?.id || null;
-
       const { data: posts, error } = await supabase
         .from("posts")
         .select("id, user_id, poster_name, type, object_path, original_name, size_bytes, created_at")
@@ -589,106 +901,20 @@
 
       allPosts = posts;
 
-      if (posts.length === 0) {
-        sectionsEl.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">📸</div>
-            <div class="empty-text">まだ投稿がありません</div>
-            <div class="empty-hint">最初の投稿をアップロードしてみましょう！</div>
-          </div>
-        `;
-        setMsg("");
-        return;
-      }
+      const names = Array.from(new Set(posts.map(p => p.poster_name))).sort();
+      const currentFilter = filterSelect.value;
+      filterSelect.innerHTML = `<option value="">全員 (${posts.length}件)</option>` + 
+        names.map(n => {
+          const count = posts.filter(p => p.poster_name === n).length;
+          return `<option value="${n}">${n} (${count}件)</option>`;
+        }).join("");
+      filterSelect.value = currentFilter;
 
-      const groupedByPoster = {};
-      posts.forEach(p => {
-        if (!groupedByPoster[p.poster_name]) {
-          groupedByPoster[p.poster_name] = [];
-        }
-        groupedByPoster[p.poster_name].push(p);
-      });
-
-      setMsg(`📊 ${posts.length}件の投稿（${Object.keys(groupedByPoster).length}人）`);
-
-      for (const [name, personPosts] of Object.entries(groupedByPoster)) {
-        const section = document.createElement("div");
-        section.className = "person-section";
-
-        const headerHtml = `
-          <div class="person-header">
-            <div class="person-info">
-              <div class="person-avatar">👤</div>
-              <div class="person-details">
-                <h3>${name}</h3>
-                <div class="person-count">${personPosts.length}件の投稿</div>
-              </div>
-            </div>
-          </div>
-        `;
-
-        const grid = document.createElement("div");
-        grid.className = "grid";
-
-        for (const p of personPosts) {
-          const url = await signedUrl(p.object_path);
-          if (!url) continue;
-
-          const card = document.createElement("div");
-          card.className = "card";
-
-          const canDelete = myUid && p.user_id === myUid;
-
-          const mediaHtml = p.type === "video" 
-            ? `<video src="${url}"></video>` 
-            : `<img src="${url}" alt="${p.original_name}">`;
-
-          card.innerHTML = `
-            <div class="media-container">
-              ${mediaHtml}
-            </div>
-            <div class="card-actions">
-              <button class="btn-download-single" data-download="${p.id}">💾</button>
-              ${canDelete ? `<button class="btn-delete" data-delete="${p.id}">🗑️</button>` : ''}
-            </div>
-            <div class="card-footer">
-              <div class="card-meta">
-                <span>${formatDate(p.created_at)}</span>
-                <span class="type-badge">${p.type === 'video' ? '🎥' : '📷'}</span>
-              </div>
-            </div>
-          `;
-
-          card.querySelector('.media-container').onclick = () => {
-            openLightbox(p, url, canDelete);
-          };
-
-          const downloadBtn = card.querySelector(`[data-download="${p.id}"]`);
-          if (downloadBtn) {
-            downloadBtn.onclick = (e) => {
-              e.stopPropagation();
-              downloadSingle(p, url);
-            };
-          }
-
-          const deleteBtn = card.querySelector(`[data-delete="${p.id}"]`);
-          if (deleteBtn) {
-            deleteBtn.onclick = (e) => {
-              e.stopPropagation();
-              deletePost(p.id);
-            };
-          }
-
-          grid.appendChild(card);
-        }
-
-        section.innerHTML = headerHtml;
-        section.appendChild(grid);
-        sectionsEl.appendChild(section);
-      }
+      renderGallery();
     }
 
     document.getElementById("reloadBtn").onclick = load;
+    filterSelect.onchange = renderGallery;
 
     load();
   </script>
